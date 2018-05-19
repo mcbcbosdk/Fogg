@@ -21,7 +21,7 @@ create table pooldetails
   PoolAdminMemberID int              not null,
   PoolName          varchar(45)      not null,
   Duration          int              not null,
-  Strenght          int              not null,
+  Strength         int              not null,
   CurrentCounter    int default '-1' not null,
   IndividualShare   double           null,
   MonthlyTakeaway   double           null,

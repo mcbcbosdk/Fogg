@@ -29,9 +29,12 @@ public class MemberHomePortal {
 
     private static void performAction(int option){
         switch (option){
-            case 1: break;
-            case 2: break;
-            case 3: break;
+            case 1: updateDetails();
+            break;
+            case 2: joinPool();
+                break;
+            case 3: createPool();
+                break;
         }
     }
 
