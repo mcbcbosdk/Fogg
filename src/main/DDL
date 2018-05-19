@@ -1,0 +1,14 @@
+create table member
+(
+  member_id           int auto_increment
+    primary key,
+  member_first_name   varchar(45) null,
+  member_last_name    varchar(45) null,
+  member_email        varchar(45) null,
+  member_password     varchar(45) null,
+  member_address      varchar(45) null,
+  member_iban         varchar(45) null,
+  member_swift_code   varchar(45) null,
+  member_nominee      varchar(45) null,
+  member_phone_number varchar(45) null
+);
