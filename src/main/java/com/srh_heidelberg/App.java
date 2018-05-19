@@ -57,7 +57,7 @@ public class App
         System.out.println("Enter Member Swift Code: ");
         memberObject.setMemberSwiftCode(scanner.next());
 
-        loadToDb(memberObject);
+        loadMemberToDb(memberObject);
     }
 
     private static void loginMember(){
@@ -68,6 +68,9 @@ public class App
         memberObject.setMemberPassword(scanner.next());
         if (isValidUser(memberObject)){
             System.out.println("Valid User");
+            MemberHomePortal memberHomePortal = new MemberHomePortal();
+            memberHomePortal.welcomeMember(memberObject);
+
         }else {
             System.out.println("Invalid Credentials. Please Try Again");
             askUserForOption();
@@ -75,7 +78,7 @@ public class App
 
     }
 
-    private static void loadToDb(Member member){
+    private static void loadMemberToDb(Member member){
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -116,6 +119,7 @@ public class App
 
             if (resultSet.first()){
                 System.out.println("New User Logged In: ");
+                copyMemberDetails(resultSet);
                 isValid = true;
             } else {
                 System.out.println("You have entered a wrong Credentials Please Try again  ");
@@ -128,5 +132,22 @@ public class App
             e.printStackTrace();
         }
         return isValid;
+    }
+
+    private static void copyMemberDetails(ResultSet resultSet) {
+
+        try {
+            memberObject.setMemberFirstName(resultSet.getString(2));
+            memberObject.setMemberLastName(resultSet.getString(3));
+            memberObject.setMemberEmail(resultSet.getString(4));
+            memberObject.setMemberAddress(resultSet.getString(6));
+            memberObject.setMemberIban(resultSet.getString(7));
+            memberObject.setMemberSwiftCode(resultSet.getString(8));
+            memberObject.setMemberNominee(resultSet.getString(9));
+            memberObject.setMemberPhoneNumber(resultSet.getString(10));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 }
