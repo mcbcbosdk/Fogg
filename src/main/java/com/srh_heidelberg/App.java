@@ -81,8 +81,8 @@ public class App
     private static void loadMemberToDb(Member member){
 
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "panish", "panishvp");
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "root", "qwe098123");
             preparedStatement = connection.prepareStatement("INSERT INTO member(member_first_name, member_last_name, member_email,member_password, member_phone_number,member_address, member_nominee, member_iban, member_swift_code)" +
                     " VALUES (?,?,?,?,?,?,?,?,?)");
             preparedStatement.setString(1,member.getMemberFirstName());
@@ -110,7 +110,7 @@ public class App
         boolean isValid = false;
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "panish", "panishvp");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "root", "qwe098123");
             preparedStatement = connection.prepareCall("SELECT  * FROM member WHERE member_email = ? AND  member_password = ?");
             preparedStatement.setString(1,member.getMemberEmail());
             preparedStatement.setString(2,member.getMemberPassword());
@@ -137,6 +137,7 @@ public class App
     private static void copyMemberDetails(ResultSet resultSet) {
 
         try {
+            memberObject.setMemberID(resultSet.getInt(1));
             memberObject.setMemberFirstName(resultSet.getString(2));
             memberObject.setMemberLastName(resultSet.getString(3));
             memberObject.setMemberEmail(resultSet.getString(4));

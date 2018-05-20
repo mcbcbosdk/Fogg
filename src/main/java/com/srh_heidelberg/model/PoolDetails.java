@@ -21,7 +21,7 @@ package com.srh_heidelberg.model;
 * */
 
 
-import java.util.Date;
+import java.sql.Date;
 
 public class PoolDetails {
 
@@ -33,8 +33,8 @@ private int Strength;
 private int CurrentCounter;
 private double IndividualShare;
 private double MonthlyTakeaway;
-private Date StartDate = new Date();
-private Date EndDate = new Date();
+private Date StartDate;
+private Date EndDate;
 private int MeetupDate;
 private int DepositDate;
 private float LateFeeCharge;
@@ -104,22 +104,6 @@ private float LateFeeCharge;
         this.MonthlyTakeaway = monthlyTakeaway;
     }
 
-    public Date getStartDate() {
-        return StartDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.StartDate = startDate;
-    }
-
-    public Date getEndDate() {
-        return EndDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.EndDate = endDate;
-    }
-
     public int getMeetupDate() {
         return MeetupDate;
     }
@@ -142,5 +126,21 @@ private float LateFeeCharge;
 
     public void setLateFeeCharge(float lateFeeCharge) {
         this.LateFeeCharge = lateFeeCharge;
+    }
+
+    public Date getStartDate() {
+        return StartDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.StartDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return EndDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.EndDate = endDate;
     }
 }

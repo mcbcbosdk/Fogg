@@ -1,13 +1,27 @@
 package com.srh_heidelberg;
 
+import com.srh_heidelberg.model.DateCalculations;
 import com.srh_heidelberg.model.Member;
+import com.srh_heidelberg.model.PoolDetails;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.sql.Date;
+import java.util.Calendar;
 import java.util.Scanner;
 
 public class MemberHomePortal {
 
     private static Scanner scanner = new Scanner(System.in);
     private static Member memberObject = new Member();
+    private static PoolDetails tempPool = new PoolDetails();
+    private static Connection connection = null;
+    private static PreparedStatement preparedStatement = null;
+
 
     public void welcomeMember(Member member){
         System.out.println("Hallo "+member.getMemberFirstName()+" "+member.getMemberLastName() + "\n ");
@@ -26,20 +40,19 @@ public class MemberHomePortal {
 
     private static void askForOperation(){
         System.out.println("Please Select An option to Proceed: ");
-        System.out.println("1. Update Details \n 2. Create Pool \n 3. Join Pool");
+        System.out.println("1. Create Pool \n 2. Join Pool \n 3. Update Details");
         int option = scanner.nextInt();
         performAction(option);
     }
 
     private static void performAction(int option){
         switch (option){
-
-            case 1: updateDetails();
-            break;
+            case 1: createPool();
+                    break;
             case 2: joinPool();
-                break;
-            case 3: createPool();
-                break;
+                    break;
+            case 3: updateDetails();
+                    break;
         }
     }
 
@@ -56,7 +69,52 @@ public class MemberHomePortal {
 
     }
 
-    private static  void createPool(){
+    private static  void createPool() {
+
+        System.out.println("Enter Pool Name : ");
+        tempPool.setPoolName(scanner.next());
+
+        System.out.println("Enter Pool Duration : ");
+        tempPool.setDuration(scanner.nextInt());
+        tempPool.setStrength(tempPool.getDuration());
+
+        System.out.println("Enter Individual Contribution Amount : ");
+        tempPool.setIndividualShare(scanner.nextDouble());
+        tempPool.setMonthlyTakeaway(tempPool.getDuration()*tempPool.getIndividualShare());
+
+        System.out.println("Enter on which day of every month Meet up will be planned : ");
+        tempPool.setMeetupDate(scanner.nextInt());
+
+        System.out.println("Enter before which day of every month Contribution has to made : ");
+        tempPool.setDepositDate(scanner.nextInt());
+
+        System.out.println("Enter Late Payment percent charge : ");
+        tempPool.setLateFeeCharge(scanner.nextFloat());
+
+        System.out.println("Enter Start date in dd-mm-yyyy");
+        String StrDate = scanner.next();
+
+       /*
+        SimpleDateFormat format = new SimpleDateFormat("dd-mm-yyyy");
+        java.util.Date IPdate = null;
+        try {
+            IPdate = format.parse(StrDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        */
+        java.util.Date javaStartdate = DateCalculations.stringToDateParse(StrDate);
+        java.sql.Date sqlStartDate =  new java.sql.Date(javaStartdate.getTime());
+
+
+        java.util.Date EndDate = DateCalculations.addMonth(javaStartdate,tempPool.getDuration());
+        java.sql.Date sqlEndDate = new java.sql.Date(EndDate.getTime());
+
+        tempPool.setStartDate(sqlStartDate);
+        tempPool.setEndDate(sqlEndDate);
+        tempPool.setPoolAdminMemberID(memberObject.getMemberID());
+
+        loadPoolToDB(tempPool);
 
     }
 
@@ -94,4 +152,36 @@ public class MemberHomePortal {
 
         }
     }
+
+    private static void loadPoolToDB(PoolDetails Pool){
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "root", "qwe098123");
+            preparedStatement = connection.prepareStatement("INSERT INTO pooldetails(PoolName,Duration,Strength," +
+                    "IndividualShare,MonthlyTakeaway,MeetupDate,DepositDate,LateFeeCharge,StartDate,EndDate,PoolAdminMemberID)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+            preparedStatement.setString(1,Pool.getPoolName());
+            preparedStatement.setInt(2,Pool.getDuration());
+            preparedStatement.setInt(3,Pool.getStrength());
+            preparedStatement.setDouble(4,Pool.getIndividualShare());
+            preparedStatement.setDouble(5,Pool.getMonthlyTakeaway());
+            preparedStatement.setInt(6,Pool.getMeetupDate());
+            preparedStatement.setInt(7,Pool.getDepositDate());
+            preparedStatement.setFloat(8,Pool.getLateFeeCharge());
+            preparedStatement.setDate(9,Pool.getStartDate());
+            preparedStatement.setDate(10,Pool.getEndDate());
+            preparedStatement.setInt(11,Pool.getPoolAdminMemberID());
+
+            preparedStatement.executeUpdate();
+            System.out.println("Registration Successful");
+
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
