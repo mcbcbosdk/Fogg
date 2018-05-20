@@ -8,10 +8,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.sql.Date;
-import java.util.Calendar;
 import java.util.Scanner;
 
 public class MemberHomePortal {

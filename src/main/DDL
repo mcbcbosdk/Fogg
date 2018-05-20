@@ -32,4 +32,34 @@ create table pooldetails
   LateFeeCharge     decimal          null
 );
 
+-- auto-generated definition
+create table pooltransactions
+(
+  UID                    int auto_increment
+    primary key,
+  PoolID                 int                null,
+  MemberID               int                null,
+  CurrentCounter         int                null,
+  IndividualMonthlyShare double             null,
+  WinnerFlag             int default '99'   null,
+  DelayFlag              int default '0'    null,
+  DelayPaymentsAmount    double default '0' null,
+  TakeawayAmount         double             null,
+  PaymentDate            date               null,
+  TakeawayDate           date               null,
+  constraint PoolTransactions_UID_uindex
+  unique (UID),
+  constraint PoolTransactions_pooldetails_PoolID_fk
+  foreign key (PoolID) references pooldetails (poolid),
+  constraint PoolTransactions_member_member_id_fk
+  foreign key (MemberID) references member (member_id)
+)
+  comment 'used for storing pool members and their Transactions';
+
+create index PoolTransactions_member_member_id_fk
+  on pooltransactions (MemberID);
+
+create index PoolTransactions_pooldetails_PoolID_fk
+  on pooltransactions (PoolID);
+
 

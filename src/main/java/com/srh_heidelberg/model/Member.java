@@ -1,6 +1,9 @@
 package com.srh_heidelberg.model;
 
 public class Member {
+
+
+    private int memberID;
     private String memberFirstName;
     private String memberLastName;
     private String memberEmail;
@@ -10,6 +13,14 @@ public class Member {
     private String memberSwiftCode;
     private String memberAddress;
     private String memberPassword;
+
+    public int getMemberID() {
+        return memberID;
+    }
+
+    public void setMemberID(int memberID) {
+        this.memberID = memberID;
+    }
 
     public String getMemberFirstName() {
         return memberFirstName;
