@@ -5,7 +5,6 @@ import com.srh_heidelberg.model.Member;
 import com.srh_heidelberg.model.PoolDetails;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -17,6 +16,7 @@ public class MemberHomePortal {
     private static PoolDetails tempPool = new PoolDetails();
     private static Connection connection = null;
     private static PreparedStatement preparedStatement = null;
+    private static DatabaseConnection databaseConnection = new DatabaseConnection();
 
 
     public void welcomeMember(Member member){
@@ -90,15 +90,6 @@ public class MemberHomePortal {
         System.out.println("Enter Start date in dd-mm-yyyy");
         String StrDate = scanner.next();
 
-       /*
-        SimpleDateFormat format = new SimpleDateFormat("dd-mm-yyyy");
-        java.util.Date IPdate = null;
-        try {
-            IPdate = format.parse(StrDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        */
         java.util.Date javaStartdate = DateCalculations.stringToDateParse(StrDate);
         java.sql.Date sqlStartDate =  new java.sql.Date(javaStartdate.getTime());
 
@@ -152,8 +143,7 @@ public class MemberHomePortal {
     private static void loadPoolToDB(PoolDetails Pool){
 
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "root", "qwe098123");
+            connection = databaseConnection.getDatabaseConnection(connection);
             preparedStatement = connection.prepareStatement("INSERT INTO pooldetails(PoolName,Duration,Strength," +
                     "IndividualShare,MonthlyTakeaway,MeetupDate,DepositDate,LateFeeCharge,StartDate,EndDate,PoolAdminMemberID)" +
                     " VALUES (?,?,?,?,?,?,?,?,?,?,?)");
@@ -173,9 +163,7 @@ public class MemberHomePortal {
             System.out.println("Registration Successful");
 
 
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
+        }catch (SQLException e) {
             e.printStackTrace();
         }
     }

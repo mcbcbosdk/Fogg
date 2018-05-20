@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.Scanner;
 
 /**
- * Hello world!
+ *
  *
  */
 public class App 
@@ -15,6 +15,7 @@ public class App
     private static Member memberObject = new Member();
     private static Connection connection = null;
     private static PreparedStatement preparedStatement = null;
+    private static DatabaseConnection databaseConnection = new DatabaseConnection();
 
 
     public static void main( String[] args )
@@ -82,7 +83,7 @@ public class App
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "root", "qwe098123");
+            connection = databaseConnection.getDatabaseConnection(connection);
             preparedStatement = connection.prepareStatement("INSERT INTO member(member_first_name, member_last_name, member_email,member_password, member_phone_number,member_address, member_nominee, member_iban, member_swift_code)" +
                     " VALUES (?,?,?,?,?,?,?,?,?)");
             preparedStatement.setString(1,member.getMemberFirstName());
@@ -109,8 +110,7 @@ public class App
 
         boolean isValid = false;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "root", "qwe098123");
+            connection = databaseConnection.getDatabaseConnection(connection);
             preparedStatement = connection.prepareCall("SELECT  * FROM member WHERE member_email = ? AND  member_password = ?");
             preparedStatement.setString(1,member.getMemberEmail());
             preparedStatement.setString(2,member.getMemberPassword());
@@ -126,8 +126,6 @@ public class App
                 isValid = false;
             }
 
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         }

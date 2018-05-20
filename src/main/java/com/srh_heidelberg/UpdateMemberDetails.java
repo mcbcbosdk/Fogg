@@ -10,9 +10,10 @@ public class UpdateMemberDetails {
     private static Scanner scanner = new Scanner(System.in);
     private static Connection connection = null;
     private static PreparedStatement preparedStatement = null;
+    private static DatabaseConnection databaseConnection = new DatabaseConnection();
 
     public void updateName(Member member){
-        getConnection();
+        connection = databaseConnection.getDatabaseConnection(connection);
         System.out.println("Enter your First Name to Update: ");
         String firstName = scanner.next();
         System.out.println("Enter your Last Name to Update: ");
@@ -29,7 +30,7 @@ public class UpdateMemberDetails {
     }
 
     public void updateEmail(Member member){
-        getConnection();
+        connection = databaseConnection.getDatabaseConnection(connection);
         System.out.println("Enter the New Email to Update: ");
         String email = scanner.next();
         try {
@@ -44,7 +45,7 @@ public class UpdateMemberDetails {
     }
 
     public void updatePassword(Member member){
-        getConnection();
+        connection = databaseConnection.getDatabaseConnection(connection);
         System.out.println("Enter your Old Password: ");
         String oldPassword = scanner.next();
         System.out.println("Enter your New Password: ");
@@ -62,7 +63,7 @@ public class UpdateMemberDetails {
     }
 
     public void updateAddress(Member member){
-        getConnection();
+        connection = databaseConnection.getDatabaseConnection(connection);
         System.out.println("Enter the New Address to Update: ");
         String address = scanner.next();
         try {
@@ -76,7 +77,7 @@ public class UpdateMemberDetails {
     }
 
     public void updateIban(Member member){
-        getConnection();
+        connection = databaseConnection.getDatabaseConnection(connection);
         System.out.println("Enter the New IBAN to Update: ");
         String iban = scanner.next();
         try {
@@ -91,7 +92,7 @@ public class UpdateMemberDetails {
     }
 
     public void updateSwiftCode(Member member){
-        getConnection();
+        connection = databaseConnection.getDatabaseConnection(connection);
         System.out.println("Enter the New Swift Code to Update: ");
         String swiftCode = scanner.next();
         try {
@@ -106,7 +107,7 @@ public class UpdateMemberDetails {
     }
 
     public void updateNominee(Member member){
-        getConnection();
+        connection = databaseConnection.getDatabaseConnection(connection);
         System.out.println("Enter the New Nominee to Update: ");
         String nominee = scanner.next();
         try {
@@ -120,7 +121,7 @@ public class UpdateMemberDetails {
     }
 
     public void updatePhoneNumber(Member member){
-        getConnection();
+        connection = databaseConnection.getDatabaseConnection(connection);
         System.out.println("Enter the New Email to Update: ");
         String phoneNumber = scanner.next();
         try {
@@ -133,21 +134,8 @@ public class UpdateMemberDetails {
         }
     }
 
-
-    private static void getConnection(){
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "panish", "panishvp");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-    }
-
     private static boolean isOldPasswordTrue(String oldPassword, String email){
-        getConnection();
+        connection = databaseConnection.getDatabaseConnection(connection);
         boolean isValid = false;
         try{
             preparedStatement = connection.prepareStatement("SELECT * FROM  member WHERE  member_email = ? AND  member_password = ?");
