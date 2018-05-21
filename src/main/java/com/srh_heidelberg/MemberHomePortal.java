@@ -39,7 +39,7 @@ public class MemberHomePortal {
 
     private static void askForOperation() {
         System.out.println("Please Select An option to Proceed: ");
-        System.out.println("1. Create Pool \n 2. Join Pool \n 3. Update Details");
+        System.out.println("1. Create Pool \n 2. Join Pool \n 3. Update Member Details \n 4. Work As Pool Admin \n 5. Pool Member");
         int option = scanner.nextInt();
         performAction(option);
     }
@@ -54,6 +54,11 @@ public class MemberHomePortal {
                 break;
             case 3:
                 updateMemberDetails();
+                break;
+            case 4: break;
+            case 5:
+                MyPoolDetails myPoolDetails = new MyPoolDetails();
+                myPoolDetails.fetchMyPoolDetails(memberObject);
                 break;
         }
     }
