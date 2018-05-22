@@ -76,7 +76,7 @@ public class MemberHomePortal {
 
         private static void workAsPoolAdmin () {
             PoolAdminPage pageAdmin = new PoolAdminPage();
-            pageAdmin.AdminOperationSelect(memberObject);
+            pageAdmin.AdminOperationSelect(memberObject.getMemberID());
 
         }
 
