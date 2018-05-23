@@ -1,7 +1,5 @@
 package com.srh_heidelberg;
 
-import com.srh_heidelberg.model.Member;
-
 import java.util.Scanner;
 
 public class PoolAdminPage {
@@ -12,7 +10,7 @@ public class PoolAdminPage {
 
     public static void AdminOperationSelect(int PoolAdmin) {
         System.out.println("Your Pools n Members :");
-        dmlOperations.getPoolMembers(PoolAdmin);
+        dmlOperations.printPoolMembers(PoolAdmin);
         PoolAdminMemberID = PoolAdmin;
         System.out.println("Selection the field to update :");
         System.out.println("1. Add Payments \n2.Pick Winner \n3.Update Pool Details");
@@ -35,7 +33,17 @@ public class PoolAdminPage {
                     PoolAdminPage.AdminOperationSelect(PoolID);
                 }
                 break;
-            case 2: break;
+            case 2:
+                System.out.println("Enter Pool ID :");
+                PoolID = scanner.nextInt();
+
+                if (dmlOperations.isValidAdmin(PoolID,PoolAdminMemberID) )
+                    dmlOperations.pickWinnerForCurrentMonth(PoolID);
+                else{
+                    System.out.println("You are Not Admin for PoolID :"+PoolID +"\nPlease retry.");
+                    PoolAdminPage.AdminOperationSelect(PoolID);
+                }
+                break;
             case 3:
                 updatePooldetails();
                 break;
