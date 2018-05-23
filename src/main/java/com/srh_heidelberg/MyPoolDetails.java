@@ -11,15 +11,14 @@ import java.util.ArrayList;
 
 public class MyPoolDetails {
 
-    private static Connection connection;
     private static PreparedStatement preparedStatement = null;
-
+    private static DatabaseConnection databaseConnection = DatabaseConnection.DatabaseConnection();
 
     public void fetchMyPoolDetails(Member member){
 
-        connection = new DatabaseConnection().getDatabaseConnection(connection);
+
         try {
-            preparedStatement = connection.prepareStatement("SELECT pooldetails.* FROM pooltransactions JOIN pooldetails  on pooltransactions.PoolID = pooldetails.PoolID WHERE pooltransactions.MemberID = ?");
+            preparedStatement = databaseConnection.singletonConnectionToDb.prepareStatement("SELECT pooldetails.* FROM pooltransactions JOIN pooldetails  on pooltransactions.PoolID = pooldetails.PoolID WHERE pooltransactions.MemberID = ?");
             preparedStatement.setInt(1,member.getMemberID());
             ResultSet resultSet = preparedStatement.executeQuery();
             int count = 1;

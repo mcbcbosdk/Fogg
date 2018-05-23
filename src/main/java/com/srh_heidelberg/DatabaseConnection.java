@@ -7,21 +7,29 @@ import java.sql.SQLException;
 
 public class DatabaseConnection {
 
-    private static Connection connection = null;
-    private static PreparedStatement preparedStatement = null;
+    private static DatabaseConnection instance = null;
+    public static Connection singletonConnectionToDb;
 
-    public Connection getDatabaseConnection(Connection connection){
+    private DatabaseConnection(){
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "root", "qwe098123");
+            singletonConnectionToDb = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "panish", "panishvp");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return connection;
+    }
+
+    public static DatabaseConnection DatabaseConnection(){
+
+        if(instance == null){
+            instance = new DatabaseConnection();
+        }
+
+        return instance;
     }
 
 

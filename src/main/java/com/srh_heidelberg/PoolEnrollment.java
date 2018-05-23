@@ -3,7 +3,6 @@ package com.srh_heidelberg;
 import com.srh_heidelberg.model.Member;
 import com.srh_heidelberg.model.PoolDetails;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,17 +11,15 @@ import java.util.Scanner;
 public class PoolEnrollment {
 
     private static PoolDetails poolDetails = new PoolDetails();
-    private static Connection connection;
     private static PreparedStatement preparedStatement = null;
-    private static DatabaseConnection databaseConnection = new DatabaseConnection();
     private static Scanner scanner = new Scanner(System.in);
-    private static  int memberId ;
+    private static int memberId;
 
     public void getPoolDetails(int poolId, Member member) {
 
         try {
-            connection = databaseConnection.getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("SELECT * FROM pooldetails WHERE PoolID = ?");
+
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("SELECT * FROM pooldetails WHERE PoolID = ?");
             preparedStatement.setInt(1, poolId);
             preparedStatement.execute();
             ResultSet resultSet = preparedStatement.getResultSet();
@@ -88,24 +85,51 @@ public class PoolEnrollment {
     }
 
     private static void enrollMember() {
+        if (isMemberinThepool()) {
+            System.out.println("You are already a member of this pool You can't Register  ");
+        } else {
 
+            try {
+                preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("INSERT INTO pooltransactions(PoolID, MemberID, CurrentCounter,IndividualMonthlyShare, WinnerFlag, DelayFlag, DelayPaymentsAmount) " +
+                        "VALUES (?,?,?,?,?,?,?)");
+                preparedStatement.setInt(1, poolDetails.getPoolID());
+                preparedStatement.setInt(2, memberId);
+                preparedStatement.setInt(3, -1);
+                preparedStatement.setDouble(4, poolDetails.getIndividualShare());
+                preparedStatement.setInt(5, -1);
+                preparedStatement.setInt(6, 0);
+                preparedStatement.setDouble(7, 0);
+                preparedStatement.executeUpdate();
+                System.out.println("You Are Added Successfully into the pool");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
 
+        }
+
+    }
+
+    private static boolean isMemberinThepool() {
+
+        boolean status = false;
         try {
-            preparedStatement = connection.prepareStatement("INSERT INTO pooltransactions(PoolID, MemberID, CurrentCounter,IndividualMonthlyShare, WinnerFlag, DelayFlag, DelayPaymentsAmount) " +
-                    "VALUES (?,?,?,?,?,?,?)");
-            preparedStatement.setInt(1,poolDetails.getPoolID());
-            preparedStatement.setInt(2, memberId);
-            preparedStatement.setInt(3,-1);
-            preparedStatement.setDouble(4,poolDetails.getIndividualShare());
-            preparedStatement.setInt(5,-1);
-            preparedStatement.setInt(6,0);
-            preparedStatement.setDouble(7,0);
-            preparedStatement.executeUpdate();
-            System.out.println("You Are Added Successfully into the pool");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("SELECT MemberID FROM pooltransactions WHERE PoolID = ? AND " +
+                    "CurrentCounter = ? AND  WinnerFlag = ?");
+            preparedStatement.setInt(1, poolDetails.getPoolID());
+            preparedStatement.setInt(2, -1);
+            preparedStatement.setInt(3, 99);
+            preparedStatement.execute();
+            ResultSet resultSet = preparedStatement.getResultSet();
+            if (resultSet == null) {
+                status = false;
+            } else {
+                status = true;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
+        return status;
     }
 
 

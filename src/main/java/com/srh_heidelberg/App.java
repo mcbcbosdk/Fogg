@@ -2,43 +2,44 @@ package com.srh_heidelberg;
 
 import com.srh_heidelberg.model.Member;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 /**
  *
  *
  */
-public class App 
-{
+public class App {
     private static Scanner scanner = new Scanner(System.in);
     private static Member memberObject = new Member();
-    private static Connection connection = null;
     private static PreparedStatement preparedStatement = null;
-    private static DatabaseConnection databaseConnection = new DatabaseConnection();
+    public static DatabaseConnection databaseConnection = DatabaseConnection.DatabaseConnection();
 
-
-    public static void main( String[] args )
-    {
+    public static void main(String[] args) {
 
         askUserForOption();
     }
 
-    private static void askUserForOption(){
+    private static void askUserForOption() {
         System.out.println("Please Select the Option \n");
         System.out.println("1. Register \n 2. Login \n");
         int option = scanner.nextInt();
-        switch(option) {
-            case 1: registerMember();
+        switch (option) {
+            case 1:
+                registerMember();
                 break;
-            case 2: loginMember();
+            case 2:
+                loginMember();
                 break;
-            default: System.out.println("Please chose a right Option ");
+            default:
+                System.out.println("Please chose a right Option ");
                 break;
         }
     }
 
-    private static void registerMember(){
+    private static void registerMember() {
         System.out.println("Enter Member FirstName : ");
         memberObject.setMemberFirstName(scanner.next());
         System.out.println("Enter Member LastName : ");
@@ -61,40 +62,39 @@ public class App
         loadMemberToDb(memberObject);
     }
 
-    private static void loginMember(){
+    private static void loginMember() {
 
         System.out.println("Enter your E-mail Id : ");
         memberObject.setMemberEmail(scanner.next());
         System.out.println("Enter your Password: ");
         memberObject.setMemberPassword(scanner.next());
-        if (isValidUser(memberObject)){
+        if (isValidUser(memberObject)) {
             System.out.println("Valid User");
             MemberHomePortal memberHomePortal = new MemberHomePortal();
             memberHomePortal.welcomeMember(memberObject);
 
-        }else {
+        } else {
             System.out.println("Invalid Credentials. Please Try Again");
             askUserForOption();
         }
 
     }
 
-    private static void loadMemberToDb(Member member){
+    private static void loadMemberToDb(Member member) {
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = databaseConnection.getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("INSERT INTO member(member_first_name, member_last_name, member_email,member_password, member_phone_number,member_address, member_nominee, member_iban, member_swift_code)" +
+            preparedStatement = databaseConnection.singletonConnectionToDb.prepareStatement("INSERT INTO member(member_first_name, member_last_name, member_email,member_password, member_phone_number,member_address, member_nominee, member_iban, member_swift_code)" +
                     " VALUES (?,?,?,?,?,?,?,?,?)");
-            preparedStatement.setString(1,member.getMemberFirstName());
+            preparedStatement.setString(1, member.getMemberFirstName());
             preparedStatement.setString(2, member.getMemberLastName());
-            preparedStatement.setString(3,member.getMemberEmail());
-            preparedStatement.setString(4,member.getMemberPassword());
-            preparedStatement.setString(5,member.getMemberPhoneNumber());
-            preparedStatement.setString(6,member.getMemberAddress());
-            preparedStatement.setString(7,member.getMemberNominee());
-            preparedStatement.setString(8,member.getMemberIban());
-            preparedStatement.setString(9,member.getMemberSwiftCode());
+            preparedStatement.setString(3, member.getMemberEmail());
+            preparedStatement.setString(4, member.getMemberPassword());
+            preparedStatement.setString(5, member.getMemberPhoneNumber());
+            preparedStatement.setString(6, member.getMemberAddress());
+            preparedStatement.setString(7, member.getMemberNominee());
+            preparedStatement.setString(8, member.getMemberIban());
+            preparedStatement.setString(9, member.getMemberSwiftCode());
             preparedStatement.executeUpdate();
             System.out.println("Registration Successful");
             askUserForOption();
@@ -106,18 +106,17 @@ public class App
         }
     }
 
-    private static boolean isValidUser(Member member){
+    private static boolean isValidUser(Member member) {
 
         boolean isValid = false;
         try {
-            connection = databaseConnection.getDatabaseConnection(connection);
-            preparedStatement = connection.prepareCall("SELECT  * FROM member WHERE member_email = ? AND  member_password = ?");
-            preparedStatement.setString(1,member.getMemberEmail());
-            preparedStatement.setString(2,member.getMemberPassword());
+            preparedStatement = databaseConnection.singletonConnectionToDb.prepareCall("SELECT  * FROM member WHERE member_email = ? AND  member_password = ?");
+            preparedStatement.setString(1, member.getMemberEmail());
+            preparedStatement.setString(2, member.getMemberPassword());
             preparedStatement.execute();
             ResultSet resultSet = preparedStatement.getResultSet();
 
-            if (resultSet.first()){
+            if (resultSet.first()) {
                 System.out.println("New User Logged In: ");
                 copyMemberDetails(resultSet);
                 isValid = true;

@@ -1,20 +1,15 @@
 package com.srh_heidelberg;
 
-        import com.srh_heidelberg.model.DateCalculations;
-        import com.srh_heidelberg.model.PoolDetails;
+import com.srh_heidelberg.model.DateCalculations;
 
-        import java.sql.Connection;
-        import java.sql.PreparedStatement;
-        import java.sql.SQLException;
-        import java.util.Date;
-        import java.util.Scanner;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Scanner;
+
 public class UpdatePoolDetails {
 
     private static Scanner scanner = new Scanner(System.in);
-    private static Connection connection;
     private static PreparedStatement preparedStatement = null;
-
-
 
 
     public void updatePoolName() {
@@ -23,8 +18,7 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  PoolName = ? WHERE PoolID= ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  PoolName = ? WHERE PoolID= ?");
             preparedStatement.setString(1, poolName);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();
@@ -39,8 +33,7 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  Duration = ? WHERE PoolID= ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  Duration = ? WHERE PoolID= ?");
             preparedStatement.setInt(1, duration);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();
@@ -56,8 +49,7 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  Strength = ? WHERE PoolID= ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  Strength = ? WHERE PoolID= ?");
             preparedStatement.setInt(1, strength);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();
@@ -72,8 +64,7 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  CurrentCounter = ? WHERE PoolID= ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  CurrentCounter = ? WHERE PoolID= ?");
             preparedStatement.setInt(1, currentCounter);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();
@@ -88,8 +79,7 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  IndividualShare = ? WHERE PoolID= ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  IndividualShare = ? WHERE PoolID= ?");
             preparedStatement.setDouble(1, individualShare);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();
@@ -104,8 +94,8 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  MonthlyTakeaway = ? WHERE PoolID= ?");
+
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  MonthlyTakeaway = ? WHERE PoolID= ?");
             preparedStatement.setDouble(1, monthlyTakeaway);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();
@@ -123,8 +113,7 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  StartDate = ? WHERE PoolID= ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  StartDate = ? WHERE PoolID= ?");
             preparedStatement.setDate(1, sqlStartDate);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();
@@ -141,8 +130,8 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  EndDate = ? WHERE PoolID= ?");
+
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  EndDate = ? WHERE PoolID= ?");
             preparedStatement.setDate(1, sqlEndDate);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();
@@ -157,8 +146,8 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  MeetupDate = ? WHERE PoolID= ?");
+
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  MeetupDate = ? WHERE PoolID= ?");
             preparedStatement.setInt(1, meetUpdate);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();
@@ -174,8 +163,8 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  DepositDate = ? WHERE PoolID= ?");
+
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  DepositDate = ? WHERE PoolID= ?");
             preparedStatement.setInt(1, depositDate);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();
@@ -190,8 +179,8 @@ public class UpdatePoolDetails {
         System.out.println("Enter Pool ID of the Pool: ");
         int poolID = scanner.nextInt();
         try {
-            connection =  new DatabaseConnection().getDatabaseConnection(connection);
-            preparedStatement = connection.prepareStatement("UPDATE  pooldetails  SET  LateFeeCharge = ? WHERE PoolID= ?");
+
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("UPDATE  pooldetails  SET  LateFeeCharge = ? WHERE PoolID= ?");
             preparedStatement.setInt(1, lateFeeCharge);
             preparedStatement.setInt(2, poolID);
             preparedStatement.executeUpdate();

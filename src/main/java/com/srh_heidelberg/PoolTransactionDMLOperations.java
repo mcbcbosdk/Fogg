@@ -9,8 +9,6 @@ import java.util.ArrayList;
 public class PoolTransactionDMLOperations {
 
     private static PreparedStatement preparedStatement = null;
-    private static Connection connection = null;
-    private static DatabaseConnection databaseConnection = new DatabaseConnection();
 
     private static void insertNewBlankTransaction(int PoolID,int MemeberID,int counter) {
 
@@ -20,7 +18,7 @@ public class PoolTransactionDMLOperations {
 
             double individualContri = getIndividualContribution(PoolID);
 
-            preparedStatement = connection.prepareCall("INSERT into pooltransactions " +
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("INSERT into pooltransactions " +
                     "(PoolID, MemberID, CurrentCounter, IndividualMonthlyShare, PaymentDate) " +
                     "VALUE (?,?,?,?,?)");
 
@@ -41,7 +39,7 @@ public class PoolTransactionDMLOperations {
     private static double getIndividualContribution(int poolID){
         double individualContri = 0;
         try {
-            preparedStatement = connection.prepareCall("select IndividualShare from pooldetails where PoolID = ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select IndividualShare from pooldetails where PoolID = ?");
             preparedStatement.setInt(1,poolID);
             preparedStatement.execute();
 
@@ -73,7 +71,7 @@ public class PoolTransactionDMLOperations {
     private static void setCounterInPooldetails(int poolID,int counter){
 
         try {
-            preparedStatement = connection.prepareCall("UPDATE pooldetails set CurrentCounter = ? where PoolID = ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("UPDATE pooldetails set CurrentCounter = ? where PoolID = ?");
             preparedStatement.setInt(1,counter);
             preparedStatement.setInt(2,poolID);
             preparedStatement.executeUpdate();
@@ -86,7 +84,7 @@ public class PoolTransactionDMLOperations {
     private static void setCounterInPoolTransaction (int poolID, int counter){
 
         try {
-            preparedStatement = connection.prepareCall("UPDATE pooltransactions set CurrentCounter = ? " +
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("UPDATE pooltransactions set CurrentCounter = ? " +
                     "where PoolID = ? and CurrentCounter = ?");
             preparedStatement.setInt(1,counter);
             preparedStatement.setInt(2,poolID);
@@ -102,7 +100,7 @@ public class PoolTransactionDMLOperations {
     private static int getCounterFromPoolTransaction(int poolID){
         int countFetched=0;
         try {
-            preparedStatement = connection.prepareCall("SELECT MAX(CurrentCounter) from pooltransactions " +
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("SELECT MAX(CurrentCounter) from pooltransactions " +
                     "where PoolID = ? ");
             preparedStatement.setInt(1,poolID);
             preparedStatement.execute();
@@ -121,7 +119,7 @@ public class PoolTransactionDMLOperations {
     private static int getCounterFromPoolDetails (int poolID) {
         int countFetched = 0;
         try {
-            preparedStatement = connection.prepareCall("select CurrentCounter from pooldetails where PoolID = ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select CurrentCounter from pooldetails where PoolID = ?");
             preparedStatement.setInt(1,poolID);
             preparedStatement.execute();
             ResultSet rs = preparedStatement.executeQuery();
@@ -138,7 +136,7 @@ public class PoolTransactionDMLOperations {
     private static int getStrenghtOfPool (int poolID) {
         int strength = 0;
         try {
-            preparedStatement = connection.prepareCall("select Strength from pooldetails where PoolID = ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select Strength from pooldetails where PoolID = ?");
             preparedStatement.setInt(1, poolID);
             preparedStatement.execute();
 
@@ -155,7 +153,7 @@ public class PoolTransactionDMLOperations {
         // will give count of people made payment for that Months cycle
         int payerCount = 0;
         try {
-            preparedStatement = connection.prepareCall("select count(MemberID) from pooltransactions " +
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select count(MemberID) from pooltransactions " +
                     "where PoolID = ? and CurrentCounter = ?");
             preparedStatement.setInt(1,poolID);
             preparedStatement.setInt(2,counter);
@@ -170,7 +168,7 @@ public class PoolTransactionDMLOperations {
     }
 
     public void makePaymentForMember(int PoolID,int MemeberID){
-        connection = databaseConnection.getDatabaseConnection(connection);
+
 
         int strenght = getStrenghtOfPool(PoolID);
         int currentMaxCounter = getCounterFromPoolDetails(PoolID);
@@ -209,8 +207,7 @@ public class PoolTransactionDMLOperations {
     public  void getPoolMembers (int AdminMemberID){
         try {
 
-            connection = databaseConnection.getDatabaseConnection(connection);
-            preparedStatement = connection.prepareCall("select PD.PoolID,PT.MemberID from pooldetails PD JOIN pooltransactions PT " +
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select PD.PoolID,PT.MemberID from pooldetails PD JOIN pooltransactions PT " +
                     "ON PD.PoolID = PT.PoolID where PD.PoolAdminMemberID = ? AND PT.CurrentCounter = ? AND PT.WinnerFlag = ?");
             preparedStatement.setInt(1,AdminMemberID);
             preparedStatement.setInt(2,-1);
@@ -234,8 +231,7 @@ public class PoolTransactionDMLOperations {
     public boolean isValidAdmin(int PoolID,int AdminID){
         boolean status = false;
         try {
-            connection = databaseConnection.getDatabaseConnection(connection);
-            preparedStatement = connection.prepareCall("select count(*) from pooldetails where PoolID = ? AND  PoolAdminMemberID = ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select count(*) from pooldetails where PoolID = ? AND  PoolAdminMemberID = ?");
             preparedStatement.setInt(1,PoolID);
             preparedStatement.setInt(2,AdminID);
             preparedStatement.execute();
@@ -255,8 +251,7 @@ public class PoolTransactionDMLOperations {
     public boolean isValidMember(int PoolID,int MemberID){
         boolean status = false;
         try {
-            connection = databaseConnection.getDatabaseConnection(connection);
-            preparedStatement = connection.prepareCall("select count(*) from pooltransactions " +
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select count(*) from pooltransactions " +
                     "where PoolID = ? AND  MemberID = ? AND CurrentCounter = ? and WinnerFlag = ? ");
             preparedStatement.setInt(1,PoolID);
             preparedStatement.setInt(2,MemberID);
