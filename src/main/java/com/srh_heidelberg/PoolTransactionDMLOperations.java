@@ -1,6 +1,7 @@
 package com.srh_heidelberg;
 
 
+import com.srh_heidelberg.model.DateCalculations;
 import com.srh_heidelberg.model.PoolTransactions;
 
 import java.sql.*;
@@ -168,6 +169,60 @@ public class PoolTransactionDMLOperations {
         return payerCount;
     }
 
+    private static  int getDepositDay(int poolID){
+        int depositDay = 0;
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("SELECT DepositDate from pooldetails " +
+                    "where PoolID = ?");
+            preparedStatement.setInt(1,poolID);
+            preparedStatement.execute();
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            depositDay = rs.getInt(1);
+            return depositDay;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return depositDay;
+    }
+
+    private static java.util.Date getStartDate(int poolID){
+        java.util.Date startDate = new java.util.Date();
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("SELECT StartDate from pooldetails " +
+                    "where PoolID = ?");
+            preparedStatement.setInt(1,poolID);
+            preparedStatement.execute();
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            startDate = rs.getDate(1);
+            return startDate;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return startDate;
+    }
+
+    private static boolean isDelay (int poolID){
+        int depositDay = getDepositDay(poolID);
+        int currentCounter = getCounterFromPoolDetails(poolID);
+        Date startDate = (Date) getStartDate(poolID);
+
+        java.util.Date monthStartDate =  DateCalculations.addMonth(startDate,currentCounter);
+
+        java.util.Date depositDate = DateCalculations.addDay(monthStartDate,depositDay);
+
+        java.util.Date currentDate = new java.util.Date();
+
+        if (currentDate.after(depositDate))
+            return true;
+        else
+            return false;
+
+    }
+
     public void makePaymentForMember(int PoolID,int MemeberID){
 
 
@@ -179,15 +234,79 @@ public class PoolTransactionDMLOperations {
         System.out.println("Current Counter : " + currentMaxCounter);
         System.out.println("Payer Count :" +payersCount);
 
-        if (currentMaxCounter <= strenght){
-            if ( (payersCount == strenght) ){
-                updateCurrentCounter(PoolID);
-                currentMaxCounter = getCounterFromPoolDetails(PoolID);
+        if (isDelay(PoolID))
+            updateDelayPayments(PoolID,MemeberID,currentMaxCounter);
+        else{
+            if (currentMaxCounter <= strenght){
+                if ( (payersCount == strenght) ){
+                    updateCurrentCounter(PoolID);
+                    currentMaxCounter = getCounterFromPoolDetails(PoolID);
+                }
+                insertNewBlankTransaction(PoolID,MemeberID,currentMaxCounter);
+                System.out.println("Transaction added");
             }
-            insertNewBlankTransaction(PoolID,MemeberID,currentMaxCounter);
-            System.out.println("Transaction added");
         }
+    }
 
+    private static double getLateFeeCharge(int poolID){
+        double lateFeeCharge = 0;
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select LateFeeCharge from pooldetails where PoolID = ?");
+            preparedStatement.setInt(1,poolID);
+            preparedStatement.execute();
+
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            lateFeeCharge =  rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lateFeeCharge;
+    }
+
+    private static int getMonthlyTakeaway(int poolID){
+        int monthlyTakeway = 0;
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select MonthlyTakeaway from pooldetails where PoolID = ?");
+            preparedStatement.setInt(1,poolID);
+            preparedStatement.execute();
+
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            monthlyTakeway =  rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return monthlyTakeway;
+    }
+
+    private void updateDelayPayments(int poolID,int memberID,int currentCounter) {
+        java.util.Date tempDate = new java.util.Date();
+        Date currentDate = new Date(tempDate.getTime());
+
+        double individualContribution = getIndividualContribution(poolID);
+        double lateFeeCharge = getLateFeeCharge(poolID);
+
+        double latePaymentAmount = (lateFeeCharge/100)*individualContribution;
+
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("UPDATE pooltransactions set " +
+                    "DelayFlag = ? , DelayPaymentsAmount = ? ,PaymentDate = ?" +
+                    "where PoolID = ? and MemberID = ? and  CurrentCounter = ? and PaymentDate is null ");
+            preparedStatement.setInt(1,1);
+            preparedStatement.setDouble(2,latePaymentAmount);
+            preparedStatement.setDate(3,currentDate);
+            preparedStatement.setInt(4,poolID);
+            preparedStatement.setInt(5,memberID);
+            preparedStatement.setInt(6,currentCounter);
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
 
     }
