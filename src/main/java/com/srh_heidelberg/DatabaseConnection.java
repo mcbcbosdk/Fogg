@@ -14,7 +14,7 @@ public class DatabaseConnection {
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            singletonConnectionToDb = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "panish", "panishvp");
+            singletonConnectionToDb = DriverManager.getConnection("jdbc:mysql://localhost:3306/money_pool", "root", "qwe098123");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
