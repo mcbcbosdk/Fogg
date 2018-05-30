@@ -1,3 +1,4 @@
+-- auto-generated definition
 create table member
 (
   member_id           int auto_increment
@@ -13,15 +14,15 @@ create table member
   member_phone_number varchar(45) null
 );
 
-
+-- auto-generated definition
 create table pooldetails
 (
-  PoolID            int              not null
+  PoolID            int auto_increment
     primary key,
   PoolAdminMemberID int              not null,
   PoolName          varchar(45)      not null,
   Duration          int              not null,
-  Strength         int              not null,
+  Strength          int              not null,
   CurrentCounter    int default '-1' not null,
   IndividualShare   double           null,
   MonthlyTakeaway   double           null,
@@ -29,7 +30,9 @@ create table pooldetails
   EndDate           datetime         null,
   MeetupDate        int              null,
   DepositDate       int              null,
-  LateFeeCharge     decimal          null
+  LateFeeCharge     decimal          null,
+  constraint pooldetails_PoolID_uindex
+  unique (PoolID)
 );
 
 -- auto-generated definition
@@ -47,6 +50,8 @@ create table pooltransactions
   TakeawayAmount         double             null,
   PaymentDate            date               null,
   TakeawayDate           date               null,
+  PickerFlag             int default '0'    null,
+  AuctionTakeaway        double             null,
   constraint PoolTransactions_UID_uindex
   unique (UID),
   constraint PoolTransactions_pooldetails_PoolID_fk
@@ -61,5 +66,6 @@ create index PoolTransactions_member_member_id_fk
 
 create index PoolTransactions_pooldetails_PoolID_fk
   on pooltransactions (PoolID);
+
 
 

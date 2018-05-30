@@ -87,7 +87,7 @@ public class PoolEnrollment {
     }
 
     private static void enrollMember() {
-        if (isMemberInThepool() & dmlOperations.isValidPoolAdd(poolDetails.getPoolID())) {
+        if (isMemberInThepool() ) {
             System.out.println("You are already a member of this pool You can't Register  ");
         } else {
 
