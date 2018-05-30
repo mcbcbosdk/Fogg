@@ -3,8 +3,10 @@ package com.srh_heidelberg;
 import com.srh_heidelberg.model.DateCalculations;
 import com.srh_heidelberg.model.Member;
 import com.srh_heidelberg.model.PoolDetails;
+import com.srh_heidelberg.model.PoolTransactions;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -88,7 +90,8 @@ public class MemberHomePortal {
     private static void createPool() {
 
         System.out.println("Enter Pool Name : ");
-        tempPool.setPoolName(scanner.next());
+        String poolName = scanner.next();
+        tempPool.setPoolName(poolName);
 
         System.out.println("Enter Pool Duration : ");
         tempPool.setDuration(scanner.nextInt());
@@ -107,7 +110,7 @@ public class MemberHomePortal {
         System.out.println("Enter Late Payment percent charge : ");
         tempPool.setLateFeeCharge(scanner.nextFloat());
 
-        System.out.println("Enter Start date in dd-mm-yyyy");
+        System.out.println("Enter Start date in dd/MM/yyyy");
         String StrDate = scanner.next();
 
         java.util.Date javaStartdate = DateCalculations.stringToDateParse(StrDate);
@@ -122,6 +125,9 @@ public class MemberHomePortal {
         tempPool.setPoolAdminMemberID(memberObject.getMemberID());
 
         loadPoolToDB(tempPool);
+
+        int poolID = getPoolID(tempPool);
+        poolEnrollment.getPoolDetails(poolID, memberObject);
 
     }
 
@@ -168,6 +174,34 @@ public class MemberHomePortal {
                 break;
 
         }
+    }
+
+    private static int getPoolID(PoolDetails pool){
+        int poolID = 0;
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select PoolID from pooldetails " +
+                    "where PoolName = ? and Duration = ? and Strength= ? and IndividualShare = ? and MonthlyTakeaway = ? and MeetupDate =? " +
+                    "and DepositDate = ? and LateFeeCharge = ? and StartDate = ? and EndDate = ? and PoolAdminMemberID = ?");
+            preparedStatement.setString(1, pool.getPoolName());
+            preparedStatement.setInt(2, pool.getDuration());
+            preparedStatement.setInt(3, pool.getStrength());
+            preparedStatement.setDouble(4, pool.getIndividualShare());
+            preparedStatement.setDouble(5, pool.getMonthlyTakeaway());
+            preparedStatement.setInt(6, pool.getMeetupDate());
+            preparedStatement.setInt(7, pool.getDepositDate());
+            preparedStatement.setFloat(8, pool.getLateFeeCharge());
+            preparedStatement.setDate(9, pool.getStartDate());
+            preparedStatement.setDate(10, pool.getEndDate());
+            preparedStatement.setInt(11, pool.getPoolAdminMemberID());
+            preparedStatement.execute();
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            poolID = rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return poolID;
     }
 
     private static void loadPoolToDB(PoolDetails Pool) {

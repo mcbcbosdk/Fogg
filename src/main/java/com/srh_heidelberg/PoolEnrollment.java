@@ -13,6 +13,8 @@ public class PoolEnrollment {
     private static PoolDetails poolDetails = new PoolDetails();
     private static PreparedStatement preparedStatement = null;
     private static Scanner scanner = new Scanner(System.in);
+    private static MemberHomePortal backToMain = new MemberHomePortal();
+    private static PoolTransactionDMLOperations dmlOperations = new PoolTransactionDMLOperations();
     private static int memberId;
 
     public void getPoolDetails(int poolId, Member member) {
@@ -67,7 +69,7 @@ public class PoolEnrollment {
 
     private static void askForEnrollment() {
         System.out.println("Please Confirm your Enrollment by Selecting an Option: ");
-        System.out.println("1. Enroll Me \n 2. Don't Enroll Me 3. Exit");
+        System.out.println("1. Enroll Me \n 2. Back to Main Menu2 3. Exit");
         int option = scanner.nextInt();
         processOperation(option);
     }
@@ -78,27 +80,24 @@ public class PoolEnrollment {
                 enrollMember();
                 break;
             case 2:
-                break;
+               break;
             case 3:
                 break;
         }
     }
 
     private static void enrollMember() {
-        if (isMemberinThepool()) {
+        if (isMemberInThepool() & dmlOperations.isValidPoolAdd(poolDetails.getPoolID())) {
             System.out.println("You are already a member of this pool You can't Register  ");
         } else {
 
             try {
-                preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("INSERT INTO pooltransactions(PoolID, MemberID, CurrentCounter,IndividualMonthlyShare, WinnerFlag, DelayFlag, DelayPaymentsAmount) " +
-                        "VALUES (?,?,?,?,?,?,?)");
+                preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("INSERT INTO pooltransactions(PoolID, MemberID, CurrentCounter, WinnerFlag) " +
+                        "VALUES (?,?,?,?)");
                 preparedStatement.setInt(1, poolDetails.getPoolID());
                 preparedStatement.setInt(2, memberId);
                 preparedStatement.setInt(3, -1);
-                preparedStatement.setDouble(4, poolDetails.getIndividualShare());
-                preparedStatement.setInt(5, -1);
-                preparedStatement.setInt(6, 0);
-                preparedStatement.setDouble(7, 0);
+                preparedStatement.setInt(4, 99);
                 preparedStatement.executeUpdate();
                 System.out.println("You Are Added Successfully into the pool");
             } catch (SQLException e) {
@@ -109,22 +108,27 @@ public class PoolEnrollment {
 
     }
 
-    private static boolean isMemberinThepool() {
+    private static boolean isMemberInThepool() {
 
         boolean status = false;
         try {
-            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("SELECT MemberID FROM pooltransactions WHERE PoolID = ? AND " +
-                    "CurrentCounter = ? AND  WinnerFlag = ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("SELECT COUNT(*) FROM pooltransactions WHERE PoolID = ? AND " +
+                    "CurrentCounter = ? AND  WinnerFlag = ? AND  MemberID = ?");
             preparedStatement.setInt(1, poolDetails.getPoolID());
             preparedStatement.setInt(2, -1);
             preparedStatement.setInt(3, 99);
+            preparedStatement.setInt(4, memberId );
             preparedStatement.execute();
-            ResultSet resultSet = preparedStatement.getResultSet();
-            if (resultSet == null) {
-                status = false;
-            } else {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            int resultCount = resultSet.getInt(1);
+
+            if (resultCount!=0){
                 status = true;
+            }else {
+                status = false;
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -13,7 +13,7 @@ public class PoolAdminPage {
         System.out.println("Your Pools n Members :");
         dmlOperations.printPoolMembers(PoolAdmin);
         PoolAdminMemberID = PoolAdmin;
-        System.out.println("Selection the field to update :");
+        System.out.println("Select operation :");
         System.out.println("1. Add Payments \n2.Pick Winner \n3.Update Pool Details " +
                 "\n4.View Winner List \n5.Show Remaining Iterations \n6.Show Pending Payments");
         int option = scanner.nextInt();
@@ -43,6 +43,8 @@ public class PoolAdminPage {
 
                 if (dmlOperations.isValidAdmin(PoolID,PoolAdminMemberID) & dmlOperations.isValidPickWinner(PoolID) ) {
                     dmlOperations.pickWinnerForCurrentMonth(PoolID);
+                    askForAuction(PoolID);
+
                     PoolAdminPage.AdminOperationSelect(PoolAdminMemberID);
                 }
                 else{
@@ -72,8 +74,36 @@ public class PoolAdminPage {
                 dmlOperations.printPoolMembersRemainingToPay(PoolID);
                 PoolAdminPage.AdminOperationSelect(PoolAdminMemberID);
                 break;
+
         }
 
+    }
+
+    private static void askForAuction (int poolID){
+        System.out.println("Do you want auction the win?(Y/N)");
+        char ip = scanner.next().charAt(0);
+
+        if (ip == 'Y') {
+            System.out.println("Members Remaining to Win : ");
+            dmlOperations.printPoolMemberRemainingToWin(poolID);
+
+            System.out.println("Enter MemberID for Auction :");
+            int pickerMemberID = scanner.nextInt();
+
+            System.out.println("Enter auction percentage :");
+            double auctionPercent = scanner.nextDouble();
+
+            if(dmlOperations.isValidAddPicker(poolID,pickerMemberID)){
+                dmlOperations.addPicker(poolID,pickerMemberID,auctionPercent);
+            }
+            else {
+                System.out.println("Incorrect MemberID for Auction.....Please try again");
+                askForAuction(poolID);
+            }
+        }
+        else {
+            dmlOperations.updatePickerFlagForWinner(poolID);
+        }
     }
 
 

@@ -13,6 +13,15 @@ public class PoolTransactionDMLOperations {
 
     private static PreparedStatement preparedStatement = null;
 
+    public boolean isValidAddPicker(int poolID, int pickerMemberID){
+
+        Collection<Integer> remainingWinners = getPoolMemberRemainingToWin(poolID);
+
+     if (remainingWinners.contains(pickerMemberID)) return true;
+     else return false;
+
+    }
+
     private static void insertNewBlankTransaction(int PoolID,int MemeberID,int counter) {
 
         try {
@@ -217,12 +226,12 @@ public class PoolTransactionDMLOperations {
 
         java.util.Date currentDate = new java.util.Date();
 
-        if (currentDate.after(depositDate))
-            return true;
-        else
-            return false;
+        if (currentDate.after(depositDate)) return true;
+        else return false;
 
     }
+
+    private static boolean isDelayTEST (int poolID){return false;}
 
     public void makePaymentForMember(int PoolID,int MemeberID){
 
@@ -231,21 +240,21 @@ public class PoolTransactionDMLOperations {
         int currentMaxCounter = getCounterFromPoolDetails(PoolID);
         int payersCount = groupPaymentDoneCount(PoolID,currentMaxCounter);
 
-        System.out.println("Strenght : " + strenght);
-        System.out.println("Current Counter : " + currentMaxCounter);
-        System.out.println("Payer Count :" +payersCount);
+        System.out.println("[DEBUG](makePaymentForMember)Strenght : " + strenght);
+        System.out.println("[DEBUG](makePaymentForMember)Current Counter : " + currentMaxCounter);
+        System.out.println("[DEBUG](makePaymentForMember)Payer Count :" +payersCount);
 
-        if (isDelay(PoolID))
+        if (isDelayTEST(PoolID))
             updateDelayPayments(PoolID,MemeberID,currentMaxCounter);
         else{
             if (currentMaxCounter <= strenght){
                 if ( (payersCount == strenght) ){
                     updateCurrentCounter(PoolID);
                     currentMaxCounter = getCounterFromPoolDetails(PoolID);
-                    System.out.println("Updated current counter:" + currentMaxCounter);
+                    System.out.println("[DEBUG](makePaymentForMember)Updated current counter:" + currentMaxCounter);
                 }
                 insertNewBlankTransaction(PoolID,MemeberID,currentMaxCounter);
-                System.out.println("Transaction added");
+                System.out.println("[DEBUG](makePaymentForMember)Transaction added");
             }
         }
     }
@@ -402,7 +411,7 @@ public class PoolTransactionDMLOperations {
             preparedStatement.execute();
             ResultSet rs = preparedStatement.executeQuery();
             rs.next();
-            System.out.println(rs.getInt(1));
+            System.out.println("[DEBUG](isValidAdmin)"+rs.getInt(1));
 
             if (rs.getInt(1) == 1) status = true;
             else status = false;
@@ -498,7 +507,7 @@ public class PoolTransactionDMLOperations {
                 preparedStatement.setInt(3,counter);
                 preparedStatement.setDouble(4,individualContri);
                 preparedStatement.executeUpdate();
-                System.out.println("Blank Data Entered!!!!");
+                System.out.println("[DEBUG](fillUpBlankTransaction)Blank Data Entered!!!!");
             }
 
 
@@ -517,11 +526,20 @@ public class PoolTransactionDMLOperations {
         return allPoolMembers;
     }
 
+    public void printPoolMemberRemainingToWin(int poolID){
+        Collection<Integer> allPoolMembers = getPoolMembers(poolID);
+        Collection<Integer> poolMembersWhoWon = getPoolMembersWhoWon(poolID);
+
+        allPoolMembers.removeAll(poolMembersWhoWon);
+        allPoolMembers.forEach(System.out::println);
+
+    }
+
     private static Collection<Integer> getPoolMembersWhoWon(int poolID){
         Collection<Integer> poolMembersWhoWon = new ArrayList<>();
 
         try {
-            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select MemberID from pooltransactions WHERE PoolID = ? AND WinnerFlag = ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select MemberID from pooltransactions WHERE PoolID = ? AND PickerFlag = ?");
             preparedStatement.setInt(1,poolID);
             preparedStatement.setInt(2,1);
             preparedStatement.execute();
@@ -573,19 +591,38 @@ public class PoolTransactionDMLOperations {
         boolean valid;
         int numberOfTransactions = getNumberOfTransaction(poolID);
         int strenght = getStrenghtOfPool(poolID);
-        System.out.println("numberofTransaction" + numberOfTransactions);
-        System.out.println("Strenght : "+strenght);
+        System.out.println("[DEBUG](isvalidPoolAdd) numberofTransaction" + numberOfTransactions);
+        System.out.println("[DEBUG](isvalidPoolAdd) Strenght : "+strenght);
 
-        if (numberOfTransactions < (strenght*strenght)) valid = true;
+        if (numberOfTransactions < strenght) valid = true;
         else valid =  false;
         return valid;
     }
 
     public boolean isValidPickWinner(int poolID){
         boolean valid;
+
         int numberOfWinners = getNumberOfWinners(poolID);
         int strength = getStrenghtOfPool(poolID);
-        if (numberOfWinners<strength) valid = true;
+
+        int currentCounter = getCounterFromPoolDetails(poolID);
+        int checkIfWinner = 0;
+
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select count(*) from pooltransactions " +
+                    "where PoolID = ? and CurrentCounter =? and WinnerFlag = 1");
+            preparedStatement.setInt(1,poolID);
+            preparedStatement.setInt(2,currentCounter);
+            preparedStatement.execute();
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            checkIfWinner = rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if ((numberOfWinners<strength) & (checkIfWinner==0)) valid = true;
         else valid = false;
         return valid;
     }
@@ -600,7 +637,7 @@ public class PoolTransactionDMLOperations {
             ResultSet rs = preparedStatement.executeQuery();
             rs.next();
             numberOfWinners =  rs.getInt(1);
-            System.out.println("Number of Winners for PoolID :"+poolID+"is :" +numberOfWinners);
+            System.out.println("[DEBUG](getNumberOfWinners)Number of Winners for PoolID : "+poolID+" is :" +numberOfWinners);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -611,7 +648,7 @@ public class PoolTransactionDMLOperations {
     public  void getPoolMembersWhoWonDisplay(int poolID){
 
         try {
-            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select MemberID,TakeawayDate from pooltransactions WHERE PoolID = ? AND WinnerFlag = ?");
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select MemberID,TakeawayDate from pooltransactions WHERE PoolID = ? AND PickerFlag = ?");
             preparedStatement.setInt(1,poolID);
             preparedStatement.setInt(2,1);
             preparedStatement.execute();
@@ -634,4 +671,52 @@ public class PoolTransactionDMLOperations {
         return strength-numberOfWinners;
     }
 
+    public void addPicker(int poolID,int pickerMemberID,double auctionPercent) {
+        long millis=System.currentTimeMillis();
+        java.sql.Date currentDate = new java.sql.Date(millis);
+
+        int counter = getCounterFromPoolDetails(poolID);
+
+        double takeAwayAmount = getMonthlyTakeaway(poolID);
+        double winnerTakeaway = (auctionPercent*takeAwayAmount)/100;
+        double pickerTakeaway = ((100-auctionPercent)*takeAwayAmount)/100;
+
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("UPDATE pooltransactions set PickerFlag = 1,TakeawayAmount = ? ,TakeawayDate = ? where PoolID = ? and CurrentCounter = ? and MemberID = ?");
+            preparedStatement.setDouble(1,pickerTakeaway);
+            preparedStatement.setDate(2,currentDate);
+            preparedStatement.setInt(3,poolID);
+            preparedStatement.setInt(4,counter);
+            preparedStatement.setInt(5,pickerMemberID);
+            preparedStatement.executeUpdate();
+
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("UPDATE pooltransactions set TakeawayAmount = ?,TakeawayDate = ? where PoolID = ? and CurrentCounter = ? and WinnerFlag = ?");
+            preparedStatement.setDouble(1,winnerTakeaway);
+            preparedStatement.setDate(2,currentDate);
+            preparedStatement.setInt(3,poolID);
+            preparedStatement.setInt(4,counter);
+            preparedStatement.setInt(5,1);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updatePickerFlagForWinner(int poolID){
+        int counter = getCounterFromPoolDetails(poolID);
+
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("UPDATE pooltransactions set PickerFlag = 1 " +
+                    "where PoolID = ? and WinnerFlag = 1 and CurrentCounter = ?");
+
+            preparedStatement.setInt(1,poolID);
+            preparedStatement.setInt(2,counter);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
 }

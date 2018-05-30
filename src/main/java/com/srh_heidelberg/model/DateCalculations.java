@@ -28,15 +28,15 @@ public class DateCalculations {
             return cal.getTime();
         }
 
-        public static Date stringToDateParse (String ipDate){
-            SimpleDateFormat format = new SimpleDateFormat("dd-mm-yyyy");
-            Calendar IPdate = Calendar.getInstance();
+        public static Date stringToDateParse (String ipDate) {
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+            Date IPdate = null;
             try {
-                IPdate.setTime(format.parse(ipDate));
+                IPdate = format.parse(ipDate);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            return IPdate.getTime();
+            return IPdate;
         }
 
         }
