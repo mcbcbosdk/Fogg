@@ -529,7 +529,7 @@ public class PoolTransactionDMLOperations {
     public void printPoolMemberRemainingToWin(int poolID){
         Collection<Integer> allPoolMembers = getPoolMembers(poolID);
         Collection<Integer> poolMembersWhoWon = getPoolMembersWhoWon(poolID);
-
+        //TODO remove WINNER member who has won for currentMaxCounter
         allPoolMembers.removeAll(poolMembersWhoWon);
         allPoolMembers.forEach(System.out::println);
 
@@ -597,6 +597,36 @@ public class PoolTransactionDMLOperations {
         if (numberOfTransactions < strenght) valid = true;
         else valid =  false;
         return valid;
+    }
+
+
+    public boolean isValidPoolJoin(int poolID){
+        boolean valid;
+        int numberOfMembersRegistered = getCountRegisteredMembers(poolID);
+        int strenght = getStrenghtOfPool(poolID);
+        System.out.println("[DEBUG](isValidPoolJoin) numberofTransaction " + numberOfMembersRegistered);
+        System.out.println("[DEBUG](isValidPoolJoin) Strenght : "+strenght);
+
+        if (numberOfMembersRegistered < strenght) valid = true;
+        else valid =  false;
+        return valid;
+    }
+
+    private int getCountRegisteredMembers(int poolID) {
+        int numberOfMembersRegistered = 0;
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select count(*) from pooltransactions where PoolID = ? and CurrentCounter =-1 and PaymentDate is null ");
+            preparedStatement.setInt(1,poolID);
+            preparedStatement.execute();
+
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            numberOfMembersRegistered =  rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return numberOfMembersRegistered;
     }
 
     public boolean isValidPickWinner(int poolID){

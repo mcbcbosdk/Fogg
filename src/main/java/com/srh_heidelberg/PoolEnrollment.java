@@ -87,9 +87,7 @@ public class PoolEnrollment {
     }
 
     private static void enrollMember() {
-        if (isMemberInThepool() ) {
-            System.out.println("You are already a member of this pool You can't Register  ");
-        } else {
+        if (isMemberInThepool() & dmlOperations.isValidPoolJoin( poolDetails.getPoolID() ) ) {
 
             try {
                 preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareStatement("INSERT INTO pooltransactions(PoolID, MemberID, CurrentCounter, WinnerFlag) " +
@@ -103,8 +101,8 @@ public class PoolEnrollment {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
         }
+        else System.out.println("You are already a member of this pool You can't Register  ");
 
     }
 
@@ -135,6 +133,7 @@ public class PoolEnrollment {
 
         return status;
     }
+
 
 
 }
