@@ -2,12 +2,14 @@ package com.srh_heidelberg;
 
 
 import com.srh_heidelberg.model.DateCalculations;
-import com.srh_heidelberg.model.PoolTransactions;
 
-import javax.lang.model.element.Element;
-import java.sql.*;
 import java.sql.Date;
-import java.util.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Random;
 
 public class PoolTransactionDMLOperations {
 
@@ -327,6 +329,8 @@ public class PoolTransactionDMLOperations {
 
         Random rand = new Random();
         int randomElement = poolMembersRemainingToWin.get(rand.nextInt(poolMembersRemainingToWin.size()));
+
+        System.out.println("*******____CONGRATULATIONS Member ID "+randomElement+",You are Winner for "+counter+" iteration____*********");
         long millis=System.currentTimeMillis();
         java.sql.Date currentDate = new java.sql.Date(millis);
 
@@ -529,10 +533,32 @@ public class PoolTransactionDMLOperations {
     public void printPoolMemberRemainingToWin(int poolID){
         Collection<Integer> allPoolMembers = getPoolMembers(poolID);
         Collection<Integer> poolMembersWhoWon = getPoolMembersWhoWon(poolID);
-        //TODO remove WINNER member who has won for currentMaxCounter
+        Collection<Integer> poolMemberWhoWonForCurrentCycle = getPoolMemberForCurrentCycle(poolID);
         allPoolMembers.removeAll(poolMembersWhoWon);
+        allPoolMembers.removeAll(poolMemberWhoWonForCurrentCycle);
         allPoolMembers.forEach(System.out::println);
 
+    }
+
+    private static Collection<Integer> getPoolMemberForCurrentCycle(int poolID){
+        Collection<Integer> poolMemberWhoWonForCurrentCycle = new ArrayList<>();
+        int currentCounter = getCounterFromPoolDetails(poolID);
+        try {
+            preparedStatement = DatabaseConnection.singletonConnectionToDb.prepareCall("select MemberID from pooltransactions WHERE PoolID = ? AND WinnerFlag = ? and CurrentCounter = ?");
+            preparedStatement.setInt(1,poolID);
+            preparedStatement.setInt(2,1);
+            preparedStatement.setInt(3,currentCounter);
+            preparedStatement.execute();
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                poolMemberWhoWonForCurrentCycle.add(rs.getInt(1));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return poolMemberWhoWonForCurrentCycle;
     }
 
     private static Collection<Integer> getPoolMembersWhoWon(int poolID){
